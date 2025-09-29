@@ -175,15 +175,12 @@ def save_audio(audio_numpy, sample_rate, filename="output.wav"):
     """Lưu audio thành file WAV"""
     import soundfile as sf
     sf.write(filename, audio_numpy, sample_rate)
-    print(f"✓ Saved: {filename}")
-
-# Sử dụng
+    print(f" Saved: {filename}")
 if __name__ == "__main__":
     # Khởi tạo model
     init_model()
     
-    # Text cần synthesize
-    text = "Dạ, em là nhân viên chăm sóc khách hàng của, vê, e tê xê, đơn vị thu phí tự động không dừng cho xe Toyota Vios biển số tám tám H một hai ba bốn năm của anh."
+    text = "Dạ, em là nhân viên chăm sóc khách hàng của, vê e tê xê, đơn vị thu phí tự động không dừng cho xe Toyota Vios biển số tám tám H một hai ba bốn năm của anh."
     
     try:
         # Synthesize
@@ -192,13 +189,7 @@ if __name__ == "__main__":
             speed=1.0,
             playback_speed=1.1
         )
-        
-        # In thông tin
-        print(f"Duration: {metadata['duration']:.2f}s")
-        print(f"Sample Rate: {metadata['sample_rate']} Hz")
-        print(f"Audio Shape: {metadata['shape']}")
-        
-        # Lưu file
+        print("audio_numpy",audio_numpy)
         save_audio(audio_numpy, sample_rate, "output.wav")
         
     except Exception as e:

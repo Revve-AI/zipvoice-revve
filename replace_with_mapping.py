@@ -153,7 +153,6 @@ def split_text_into_chunks(text: str, min_words: int = 12, max_words: int = 20) 
         if last_words < min_words and prev_words + last_words <= max_words:
             chunks[-2] = (chunks[-2] + ' ' + chunks[-1]).strip()
             chunks.pop()
-    print('-----------------',chunks)
     return chunks
 # if __name__ == "__main__":
 #     mapping = load_mapping("/home/data/CUONG/ZipVoice/filtered.txt")

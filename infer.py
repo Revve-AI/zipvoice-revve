@@ -33,19 +33,18 @@ from zipvoice.utils.feature import VocosFbank
 from replace_with_mapping import normalize_text,split_text_into_chunks
 # Cấu hình model của bạn
 CONFIG = {
-    "model_name": "zipvoice",  # hoặc "zipvoice_distill"
-    "model_dir": "model/",  # Thư mục model của bạn
+    "model_name": "zipvoice", 
+    "model_dir": "model/",  
     "checkpoint_name": "/home/cuong/TTS/a/ZipVoice/model/checkpoint-50000.pt",  # Tên checkpoint
-    "tokenizer": "espeak",  # emilia, libritts, espeak, simple
-    "lang": "vi",  # Chỉ dùng cho espeak tokenizer
-    "vocoder_path": None,  # None để dùng vocoder mặc định từ HuggingFace
+    "tokenizer": "espeak",  
+    "lang": "vi",  
+    "vocoder_path": None,  
     "feat_scale": 0.1,
     "target_rms": 0.1,
     "sampling_rate": 24000,
     "seed": 666,
     "chunk_size": 30,  # Số từ mỗi đoạn
 }
-# Biến global để lưu model và các thành phần
 model = None
 vocoder = None
 tokenizer = None
@@ -77,7 +76,7 @@ def apply_ffmpeg_speed(input_path: str, speed_factor: float, timeout: int = 60) 
             return input_path
 
         if shutil.which("ffmpeg") is None:
-            print("⚠️ FFmpeg không được tìm thấy trên PATH. Bỏ qua speed adjustment.")
+            print(" FFmpeg không được tìm thấy trên PATH. Bỏ qua speed adjustment.")
             return input_path
 
         output_path = tempfile.NamedTemporaryFile(delete=False, suffix=".wav").name
@@ -132,7 +131,7 @@ def load_model():
     global model, vocoder, tokenizer, feature_extractor, device, model_config
     
     try:
-        print("🔄 Đang load ZipVoice model...")
+        print(" Đang load ZipVoice model...")
         
         fix_random_seed(CONFIG["seed"])
         
@@ -149,7 +148,7 @@ def load_model():
         model_config_file = model_dir / "model.json"
         token_file = model_dir / "tokens.txt"
         
-        print(f"📁 Sử dụng model local: {model_dir}")
+        print(f" Sử dụng model local: {model_dir}")
         
         for filename, filepath in [
             ("checkpoint", model_ckpt),
@@ -160,7 +159,7 @@ def load_model():
                 print(f"❌ Không tìm thấy {filename}: {filepath}")
                 return False
         
-        print("🔤 Load tokenizer...")
+        print(" Load tokenizer...")
         if CONFIG["tokenizer"] == "emilia":
             tokenizer = EmiliaTokenizer(token_file=token_file)
         elif CONFIG["tokenizer"] == "libritts":
@@ -178,7 +177,7 @@ def load_model():
         with open(model_config_file, "r") as f:
             model_config = json.load(f)
         
-        print("🧠 Tạo model...")
+        print(" Tạo model...")
         if CONFIG["model_name"] == "zipvoice":
             model = ZipVoice(
                 **model_config["model"],
@@ -190,13 +189,13 @@ def load_model():
                 **tokenizer_config,
             )
         
-        print("📥 Load checkpoint...")
+        print(" Load checkpoint...")
         if str(model_ckpt).endswith(".safetensors"):
             safetensors.torch.load_model(model, model_ckpt)
         elif str(model_ckpt).endswith(".pt"):
             load_checkpoint(filename=model_ckpt, model=model, strict=True)
         else:
-            print(f"❌ Không hỗ trợ format checkpoint: {model_ckpt}")
+            print(f" Không hỗ trợ format checkpoint: {model_ckpt}")
             return False
         
         model = model.to(device)
@@ -207,20 +206,20 @@ def load_model():
         vocoder = vocoder.to(device)
         vocoder.eval()
         
-        print("🎛️ Load feature extractor...")
+        print(" Load feature extractor...")
         if model_config["feature"]["type"] == "vocos":
             feature_extractor = VocosFbank()
         else:
-            print(f"❌ Không hỗ trợ feature type: {model_config['feature']['type']}")
+            print(f" Không hỗ trợ feature type: {model_config['feature']['type']}")
             return False
         
         CONFIG["sampling_rate"] = model_config["feature"]["sampling_rate"]
         
-        print("✅ Model đã được load thành công!")
+        print(" Model đã được load thành công!")
         return model
         
     except Exception as e:
-        print(f"❌ Lỗi khi load model: {e}")
+        print(f" Lỗi khi load model: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -288,7 +287,7 @@ def generate_speech(
         return wav.cpu(), CONFIG["sampling_rate"]
         
     except Exception as e:
-        print(f"❌ Lỗi khi generate speech: {e}")
+        print(f" Lỗi khi generate speech: {e}")
         import traceback
         traceback.print_exc()
         return None, None
@@ -324,7 +323,7 @@ def generate_speech_chunked(
                 all_wavs.append(wav)
 
        
-        print("🔗 Ghép các đoạn audio...")
+        print(" Ghép các đoạn audio...")
         silence_duration = 0.1
         silence_samples = int(silence_duration * CONFIG["sampling_rate"])
         silence = torch.zeros(1, silence_samples)
@@ -344,9 +343,9 @@ def generate_speech_chunked(
      
         
     except Exception as e:
-        print(f"❌ Lỗi khi generate speech chunked: {e}")
+        print(f" Lỗi khi generate speech chunked: {e}")
         import traceback
         traceback.print_exc()
-        return None, None, f"❌ Lỗi: {e}"
+        return None, None, f" Lỗi: {e}"
 
 
