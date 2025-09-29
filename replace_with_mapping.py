@@ -102,66 +102,78 @@ def normalize_text(text: str) -> str:
     norm = re.sub(r'([\.!?])\1+', r'\1', norm)
     norm = norm.strip()
     return norm
+import re
+from typing import List
 
-def split_text_into_chunks(text: str, min_words: int = 12, max_words: int = 20) -> List[str]:
-    """
-    Chia văn bản thành các đoạn (chunk) theo câu, không cắt một câu ở giữa.
-    """
+def split_text_into_chunks(text: str) -> List[str]:
+    
     if not text or not text.strip():
         return []
 
-    sentence_pattern = re.compile(r'(?<=\S[\.!?…])\s+|(?<=\n)+')
-    raw_sentences = [s.strip() for s in sentence_pattern.split(text) if s.strip()]
+    sentence_pattern = re.compile(r'[^.!?]*[.!?]|[^.!?]+$', re.UNICODE)
 
-    if not raw_sentences:
-        raw_sentences = [s.strip() for s in text.splitlines() if s.strip()]
+    sentences = [s.strip() for s in sentence_pattern.findall(text) if s.strip()]
 
-    chunks: List[str] = []
-    current_chunk_sentences: List[str] = []
-    current_word_count = 0
+    return sentences
+# def split_text_into_chunks(text: str, min_words: int = 12, max_words: int = 20) -> List[str]:
+#     """
+#     Chia văn bản thành các đoạn (chunk) theo câu, không cắt một câu ở giữa.
+#     """
+#     if not text or not text.strip():
+#         return []
 
-    def flush_current_chunk():
-        nonlocal current_chunk_sentences, current_word_count
-        if current_chunk_sentences:
-            chunks.append(' '.join(current_chunk_sentences).strip())
-        current_chunk_sentences = []
-        current_word_count = 0
+#     sentence_pattern = re.compile(r'(?<=\S[\.!?…])\s+|(?<=\n)+')
+#     raw_sentences = [s.strip() for s in sentence_pattern.split(text) if s.strip()]
 
-    for s in raw_sentences:
-        words_in_sentence = len(s.split())
+#     if not raw_sentences:
+#         raw_sentences = [s.strip() for s in text.splitlines() if s.strip()]
 
-        if current_word_count == 0:
-            if words_in_sentence <= max_words:
-                current_chunk_sentences.append(s)
-                current_word_count = words_in_sentence
-            else:
-                chunks.append(s)
-                current_chunk_sentences = []
-                current_word_count = 0
-        else:
-            if current_word_count + words_in_sentence <= max_words:
-                current_chunk_sentences.append(s)
-                current_word_count += words_in_sentence
-            else:
-                flush_current_chunk()
-                if words_in_sentence <= max_words:
-                    current_chunk_sentences.append(s)
-                    current_word_count = words_in_sentence
-                else:
-                    chunks.append(s)
-                    current_chunk_sentences = []
-                    current_word_count = 0
+#     chunks: List[str] = []
+#     current_chunk_sentences: List[str] = []
+#     current_word_count = 0
 
-    flush_current_chunk()
+#     def flush_current_chunk():
+#         nonlocal current_chunk_sentences, current_word_count
+#         if current_chunk_sentences:
+#             chunks.append(' '.join(current_chunk_sentences).strip())
+#         current_chunk_sentences = []
+#         current_word_count = 0
 
-    if len(chunks) >= 2:
-        last_words = len(chunks[-1].split())
-        prev_words = len(chunks[-2].split())
-        if last_words < min_words and prev_words + last_words <= max_words:
-            chunks[-2] = (chunks[-2] + ' ' + chunks[-1]).strip()
-            chunks.pop()
-    print('-----------------',chunks)
-    return chunks
+#     for s in raw_sentences:
+#         words_in_sentence = len(s.split())
+
+#         if current_word_count == 0:
+#             if words_in_sentence <= max_words:
+#                 current_chunk_sentences.append(s)
+#                 current_word_count = words_in_sentence
+#             else:
+#                 chunks.append(s)
+#                 current_chunk_sentences = []
+#                 current_word_count = 0
+#         else:
+#             if current_word_count + words_in_sentence <= max_words:
+#                 current_chunk_sentences.append(s)
+#                 current_word_count += words_in_sentence
+#             else:
+#                 flush_current_chunk()
+#                 if words_in_sentence <= max_words:
+#                     current_chunk_sentences.append(s)
+#                     current_word_count = words_in_sentence
+#                 else:
+#                     chunks.append(s)
+#                     current_chunk_sentences = []
+#                     current_word_count = 0
+
+#     flush_current_chunk()
+
+#     if len(chunks) >= 2:
+#         last_words = len(chunks[-1].split())
+#         prev_words = len(chunks[-2].split())
+#         if last_words < min_words and prev_words + last_words <= max_words:
+#             chunks[-2] = (chunks[-2] + ' ' + chunks[-1]).strip()
+#             chunks.pop()
+#     print('-----------------',chunks)
+#     return chunks
 # if __name__ == "__main__":
 #     mapping = load_mapping("/home/data/CUONG/ZipVoice/filtered.txt")
 #     text="""Hôm nay tôi gửi email cho anh chị.

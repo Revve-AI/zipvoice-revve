@@ -306,7 +306,8 @@ def generate_speech_chunked(
     try:
         all_wavs = []
     
-        chunks = split_text_into_chunks(text, chunk_size)
+        # chunks = split_text_into_chunks(text, chunk_size)
+        chunks = split_text_into_chunks(text)
         total_chunks = len(chunks)
         for i, chunk in enumerate(chunks):
                 print(f"Generate đoạn {i+1}/{total_chunks}: {chunk}")

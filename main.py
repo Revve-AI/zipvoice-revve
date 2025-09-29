@@ -41,7 +41,7 @@ def synthesize_speech(
     num_step: int = 16,
     guidance_scale: float = 1.0,
     t_shift: float = 0.5,
-    chunk_size: int = 30,
+    chunk_size: int = 1,
 ):
     """
     Synthesize speech from text with voice cloning
