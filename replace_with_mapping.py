@@ -1,6 +1,7 @@
 import re
 from typing import Optional, List
-from vinorm import TTSnorm
+# from vinorm import TTSnorm
+from pyvinorm import ViNormalizer
 import re
 from difflib import SequenceMatcher
 def load_mapping(mapping_file: str) -> dict:
@@ -15,7 +16,7 @@ def load_mapping(mapping_file: str) -> dict:
     return mapping
 
 import re
-
+normalizer = ViNormalizer(downcase=True)
 viet_pronounce = {
     'A': ', a', 'B': 'bê', 'C': 'xê', 'D': 'dê', 'E': ', e',
     'F': 'ép', 'G': 'gờ', 'H': 'hát', 'I': ', i', 'J': 'di',
@@ -52,7 +53,10 @@ def normalize_text_mapping(text: str, mapping: dict) -> str:
 #     #     norm += '.'
 #     norm = norm.strip()
 #     return norm
-
+def is_roman_numeral(text: str) -> bool:
+    """Kiểm tra xem có phải số La Mã không"""
+    roman_pattern = r'^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$'
+    return bool(re.match(roman_pattern, text.upper()))
 def normalize_text(text: str) -> str:
     """
     Giải pháp hybrid: Kết hợp cả hai approach
@@ -69,6 +73,8 @@ def normalize_text(text: str) -> str:
     
     # Xử lý từng abbreviation
     for abbr in abbreviations:
+        if is_roman_numeral(abbr):
+            continue
         abbr_lower = abbr.lower()
         
         if abbr_lower in mapping:
@@ -88,7 +94,8 @@ def normalize_text(text: str) -> str:
     
     # Step 3: Các bước xử lý khác
     norm = norm.replace("*", "")
-    norm = TTSnorm(norm)
+   # norm = TTSnorm(norm)
+    norm =normalizer.normalize(norm)
     norm = re.sub(r'\s+', ' ', norm)
     norm = re.sub(r'\s+([,\.!?;:])', r'\1', norm)
     norm = norm.replace("#", "").replace("..",".").replace(".,",",").replace(",.",".")
@@ -153,6 +160,7 @@ def split_text_into_chunks(text: str, min_words: int = 12, max_words: int = 20) 
         if last_words < min_words and prev_words + last_words <= max_words:
             chunks[-2] = (chunks[-2] + ' ' + chunks[-1]).strip()
             chunks.pop()
+    print('-----------------',chunks)
     return chunks
 # if __name__ == "__main__":
 #     mapping = load_mapping("/home/data/CUONG/ZipVoice/filtered.txt")
